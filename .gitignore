@@ -1,0 +1,9 @@
+# Okay, so venv really should kinda do this for us but this guy has a better hax for nxt time
+# https://medium.com/@jtpaasch/the-right-way-to-use-virtual-environments-1bc255a0cba7
+Include
+Lib
+pyvenv.cfg
+Scripts
+,*
+__pycache__/
+.vscode
