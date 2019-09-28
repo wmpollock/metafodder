@@ -113,7 +113,19 @@ def process_feed(feed_url):
         # way varnamy...
         tags.comments.set(url_filename, "Source filename")
         tags.save(version=(1,None,None))
+
+
+        # This tag existed in v2.2 but eyed3 barfs dealing with at least one version of 
+        # this value and IDK so y33t.
+        rvad = bytes("RVAD", "latin-1")
+        if rvad in tags.frame_set:
+            del tags.frame_set[rvad]
+
+        # Necessary to override I guess just if 2.2 'cos eyed3 won't write that :/
         tags.version = eyed3.id3.ID3_DEFAULT_VERSION;
+
+
+
         tags.save(encoding='utf-8')
 
         #exit()
