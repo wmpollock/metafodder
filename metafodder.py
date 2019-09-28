@@ -6,6 +6,11 @@ import clean_filename, eyed3, feedparser, json, os, re, urllib.parse, urllib.req
 from pathlib import Path
 from titlecase import titlecase
 
+
+#eyed3.LOCAL_ENCODING= 'UTF-8'
+#eyed3.LOCAL_FS_ENCODING= 'utf-8'
+
+
 base_outdir = os.path.join(str(Path.home()), "Music", "MetaFilter")
 
 def process_feed(feed_url):
@@ -56,8 +61,16 @@ def process_feed(feed_url):
             # OK, Boom goes the dynamite, lets get the file and start to process it
             print("Downloading", outpath)
             urllib.request.urlretrieve(url, outpath)
+        try:
+            mp3 = eyed3.load(outpath)
+            if mp3.tag:
+                tags = mp3.tag 
+            else:
+                tags = mp3.initTag()
+
+        except IOError:
+            print("IOIFAI:L")
         
-        tags = eyed3.load(outpath).tag
 
         # Normalize to metafilter naming -- we'll keep the original
         if tags.artist:
@@ -99,12 +112,11 @@ def process_feed(feed_url):
         # appears to be the greatest generator of tagged comments buuuuut theirs are all
         # way varnamy...
         tags.comments.set(url_filename, "Source filename")
-
-        #tags.save(version=(1,None,None))
+        tags.save(version=(1,None,None))
         tags.version = eyed3.id3.ID3_DEFAULT_VERSION;
-        tags.save()
+        tags.save(encoding='utf-8')
 
-        exit()
+        #exit()
         print("---------")
 
 # PREAMBLE:  Lets get to feeling right
