@@ -44,6 +44,6 @@ recoverable fashion.
 * title: {title}
 * artist: {artist}
 * album: {playlist title}
-* comments: {original-comments}[artist: {original-artist}][title: {original-title}][album: {original-album}]
+* comments: Added json structure of original tags
 * year: {year entry.published}
 * url: {entry.link}
