@@ -61,6 +61,7 @@ def process_feed(feed_url):
             # OK, Boom goes the dynamite, lets get the file and start to process it
             print("Downloading", outpath)
             urllib.request.urlretrieve(url, outpath)
+        
         try:
             mp3 = eyed3.load(outpath)
             if mp3.tag:
@@ -68,8 +69,9 @@ def process_feed(feed_url):
             else:
                 tags = mp3.initTag()
 
-        except IOError:
-            print("IOIFAI:L")
+        # A file from the appropriately uname'd 'fuq'
+        except eyed3.id3.tag.TagException:
+            print("Whoops!  Guess we'll be losing that extended header...")
         
 
         # Normalize to metafilter naming -- we'll keep the original
