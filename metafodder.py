@@ -19,6 +19,7 @@ def process_feed(feed_url):
     # Strip out the additional branding on our OG title.
     list_title = rss_playlist.feed.title.split(" | ")[0]
     print("Processing list", list_title)
+    print(len(rss_playlist['entries']), "entries in the list.")
     print("=" * 79)
     for entry in rss_playlist['entries']:
 
@@ -55,6 +56,7 @@ def process_feed(feed_url):
         print("Title: ",  title)
         print("Artist: ", artist)
         
+        # TODO: maybe nice to leverage entry[length]
         if os.path.exists(outpath):
             print(outpath, "already exists")
         else:
@@ -117,11 +119,13 @@ def process_feed(feed_url):
         tags.save(version=(1,None,None))
 
 
-        # This tag existed in v2.2 but eyed3 barfs dealing with at least one version of 
-        # this value and IDK so y33t.
-        rvad = bytes("RVAD", "latin-1")
-        if rvad in tags.frame_set:
-            del tags.frame_set[rvad]
+        # These tag existed in earlier tag revisions (2.2 mostly) but eyed3 barfs converting
+        # these.
+        poorly_handled_tags = ['IPLS','RVAD', 'RGAD']
+        for frame in poorly_handled_tags:
+            frameB = bytes(frame, "latin-1")
+            if frameB in tags.frame_set:
+                del tags.frame_set[frameB]
 
         # Necessary to override I guess just if 2.2 'cos eyed3 won't write that :/
         tags.version = eyed3.id3.ID3_DEFAULT_VERSION;
