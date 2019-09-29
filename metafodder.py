@@ -5,13 +5,10 @@
 import clean_filename, eyed3, feedparser, json, os, re, urllib.parse, urllib.request, sys
 from pathlib import Path
 from titlecase import titlecase
-
-
-#eyed3.LOCAL_ENCODING= 'UTF-8'
-#eyed3.LOCAL_FS_ENCODING= 'utf-8'
-
+from tqdm import tqdm
 
 base_outdir = os.path.join(str(Path.home()), "Music", "MetaFilter")
+pbar = None
 
 def process_feed(feed_url):
     rss_playlist = feedparser.parse(feed_url)
@@ -30,10 +27,8 @@ def process_feed(feed_url):
         # Gonna normalize this too:  you cna uname like you want to but c'mon
         title = titlecase(m.group(1)) 
         artist = m.group(2)
-        # I mean, literally I'm doing the same horrible thing here with my hyphen but
-        # at least you'll have sensible MP3 tags there, kinda.
 
-        # Also I thought maybe MeFi would be progressively using OGG but as of 2019
+        # I thought maybe MeFi would be using OGG but as of 2019
         # their submissions are still.  MP3 only ¯\_(ツ)_/¯  I mean, yeet, I guess.
         # Thought I was going to have go get all up into mimetypes.guess_extension :O
         filename = clean_filename.convert(artist + " - " + title) + ".mp3"
@@ -56,25 +51,40 @@ def process_feed(feed_url):
         print("Title: ",  title)
         print("Artist: ", artist)
         
-        # TODO: maybe nice to leverage entry[length]
+        # TODO: maybe nice to leverage enclosure[length]
+        # Hells yes it would be nice:  the existence test doesn't help us
+        # if we failed the d/l for some reason.
+        # Unfortunately since we also jack with the tags the filesize
+        # we have won't be the same as on the remote :[
         if os.path.exists(outpath):
-            print(outpath, "already exists")
+            print(outpath, "already exists.")
         else:
             # OK, Boom goes the dynamite, lets get the file and start to process it
             print("Downloading", outpath)
-            urllib.request.urlretrieve(url, outpath)
-        
+            urllib.request.urlretrieve(url, outpath, update_progress)
+
+            # Do some cleanup on the progress bar 
+            global pbar
+            pbar.close()
+            pbar = None # Lets reset this mess
         try:
             mp3 = eyed3.load(outpath)
-            if mp3.tag:
-                tags = mp3.tag 
+            if mp3:
+                if mp3.tag:
+                    tags = mp3.tag 
+                else:
+                    tags = mp3.initTag()
             else:
-                tags = mp3.initTag()
+                print("WHAAAT?1?!")
+                exit()
 
         # A file from the appropriately uname'd 'fuq'
         except eyed3.id3.tag.TagException:
             print("Whoops!  Guess we'll be losing that extended header...")
-        
+        except:
+            e = sys.exc_info()[0]
+            print("Dang, exception city", e)
+            exit()
 
         # Normalize to metafilter naming -- we'll keep the original
         if tags.artist:
@@ -130,12 +140,21 @@ def process_feed(feed_url):
         # Necessary to override I guess just if 2.2 'cos eyed3 won't write that :/
         tags.version = eyed3.id3.ID3_DEFAULT_VERSION;
 
-
-
         tags.save(encoding='utf-8')
 
-        #exit()
         print("---------")
+
+def update_progress(chunkno, chunkmax, size):
+    # I'm not sure why we wouldn't get this but if unknown we could get -1
+    # and I guess zero might be a thing 
+    global pbar;
+    if size > 0:
+        global pbar;
+        if not pbar:
+             pbar= tqdm(total=size,unit_scale=True,unit="bytes");
+
+        pbar.update(chunkmax)
+
 
 # PREAMBLE:  Lets get to feeling right
 # ----------------------------------------------------------------------------
