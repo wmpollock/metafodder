@@ -6,6 +6,14 @@ import clean_filename, eyed3, feedparser, json, os, re, urllib.parse, urllib.req
 from pathlib import Path
 from titlecase import titlecase
 from tqdm import tqdm
+import eyed3.mp3
+
+# libmagic incorrectly identifies this file (http://music.metafilter.com/1733) as x-dbt, a DBase file!
+# A guy posted a fix to his entry (https://mailman.astron.com/pipermail/file/2019-June/000146.html)
+# buuuut even if it were applied (which I'm not sure it has) we'd need to rebuild through
+# the Windows Linux subsystem which IDK, seem a bit heavy-handed compared to lying to our
+# friend here.
+eyed3.mp3.OTHER_MIME_TYPES= ['application/octet-stream', 'audio/x-hx-aac-adts', 'audio/x-wav', 'application/x-dbt']
 
 base_outdir = os.path.join(str(Path.home()), "Music", "MetaFilter")
 pbar = None
@@ -81,8 +89,8 @@ def process_feed(feed_url):
         # A file from the appropriately uname'd 'fuq'
         except eyed3.id3.tag.TagException:
             print("Whoops!  Guess we'll be losing that extended header...")
-        except:
-            e = sys.exc_info()[0]
+        except Exception as e:
+         #   e = sys.exc_info()[0]
             print("Dang, exception city", e)
             exit()
 
@@ -159,6 +167,7 @@ def update_progress(chunkno, chunkmax, size):
 # PREAMBLE:  Lets get to feeling right
 # ----------------------------------------------------------------------------
 eyed3.log.setLevel("ERROR")
+
 
 # Unfortunately necessary if you redirect STDOUT w/o barfing 
 sys.stdout.reconfigure(encoding='utf-8')
