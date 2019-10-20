@@ -2,6 +2,20 @@
 
 A python script to rip MetaFilter playlists to the local disk.
 
+# Invoke
+
+I give you this list because really, everyone needs more Jingle Rock Bell in 
+their lives.  And by more I mean like four days solid.  Ringle jock bell, y'all.
+
+```sh
+
+py metafodder.py https://music.metafilter.com/playlist/1273
+
+```
+
+Please set up your own account and discover artists into which to create
+your own playlists.
+
 ## Background
 
 I love the artists available on MetaFilter but I worry sometimes about the
@@ -15,6 +29,16 @@ is most often then apart from the rest of one's music stash.
 
 If you have a great piece of podcast ripping software with which one can normalize
 and do this other mess, please HMU: I do this mostly out of impatience.
+
+## Ethics
+
+Metafilter is a private entity which the developer is in no way afiliated with.
+They're getting by on an always-challenging advertising income paired with
+member contributions.
+
+If you find the content useful consider contributing:
+
+https://login.metafilter.com/funding.mefi
 
 ## Source issues
 
